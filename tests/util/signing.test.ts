@@ -38,6 +38,23 @@ describe("XmlSigner", () => {
 
             expect(signer).toBeDefined();
         });
+
+        it("should load keys and certificates from file paths", () => {
+            const keyPath = "/tmp/mock-private-key.pem";
+            const certPath = "/tmp/mock-public-cert.pem";
+            fs.writeFileSync(keyPath, mockPrivateKey);
+            fs.writeFileSync(certPath, mockPublicCert);
+
+            const signer = new XmlSigner({
+                privateKey: keyPath,
+                publicCert: certPath
+            });
+
+            expect(signer).toBeDefined();
+
+            fs.unlinkSync(keyPath);
+            fs.unlinkSync(certPath);
+        });
     });
 
     describe("generateId", () => {

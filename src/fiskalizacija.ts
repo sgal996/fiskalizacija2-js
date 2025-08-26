@@ -82,7 +82,10 @@ export class FiskalizacijaClient {
             result.soapResRaw = data;
 
             try {
-                result.soapResSignatureValid = XmlSigner.isValidSignature(result.soapResRaw);
+                result.soapResSignatureValid = XmlSigner.isValidSignature(
+                    result.soapResRaw,
+                    this.options.publicCert
+                );
             } catch (error) {
                 result.soapResSignatureValid = false;
                 result.error = parseError(error);
