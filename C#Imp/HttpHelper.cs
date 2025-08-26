@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Fiskalizacija2 {
     public static class HttpHelper {
@@ -9,6 +10,13 @@ namespace Fiskalizacija2 {
             var handler = new HttpClientHandler();
             if (options.AllowSelfSigned) {
                 handler.ServerCertificateCustomValidationCallback = (req, cert, chain, errors) => true;
+            } else if (options.Ca != null && options.Ca.Length > 0) {
+                var caCert = new X509Certificate2(options.Ca);
+                handler.ServerCertificateCustomValidationCallback = (req, cert, chain, errors) => {
+                    chain.ChainPolicy.CustomTrustStore.Add(caCert);
+                    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                    return chain.Build(cert);
+                };
             }
             using var client = new HttpClient(handler);
             client.Timeout = TimeSpan.FromMilliseconds(options.Timeout);
