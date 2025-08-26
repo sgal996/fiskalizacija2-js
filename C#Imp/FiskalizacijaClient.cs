@@ -12,47 +12,56 @@ namespace Fiskalizacija2 {
         }
 
         private async Task<FiskalizacijaResult<TReq, TRes>> Execute<TReqData, TReq, TRes>(
-
+            object zahtjev,
             RequestConfig<TReqData, TReq, TRes> config
         ) where TReq : SerializableRequest where TRes : ParsedResponse {
             var result = new FiskalizacijaResult<TReq, TRes> { Success = false };
             try {
-
-                var requestInstance = zahtjev is TReq existing ? existing : config.RequestFactory!(zahtjev);
+                var requestInstance = zahtjev is TReq existing
+                    ? existing
+                    : config.RequestFactory!((TReqData)zahtjev);
                 result.ReqObject = requestInstance;
+
                 var signedXml = _signer.SignFiscalizationRequest(requestInstance.ToXmlString(), requestInstance.Id);
                 var soap = GenerateSoapEnvelope(signedXml);
                 result.SoapReqRaw = soap;
+
                 var (statusCode, data) = await HttpHelper.PostRequestAsync(soap, _options);
                 result.HttpStatusCode = statusCode;
                 result.SoapResRaw = data;
+
                 try {
                     result.SoapResSignatureValid = XmlSigner.IsValidSignature(data);
                 } catch (Exception e) {
                     result.SoapResSignatureValid = false;
                     result.Error = ErrorUtils.ParseError(e);
                 }
+
                 if (config.ResponseFactory != null) {
                     result.ResObject = config.ResponseFactory(data);
                 }
+
                 result.Success = result.Error == null;
             }
             catch (Exception ex) {
                 result.Error = ErrorUtils.ParseError(ex);
             }
-          
 
-                result.ReqObject = zahtjev;
-                var signedXml = _signer.SignFiscalizationRequest(zahtjev.ToXmlString(), zahtjev.Id);
-                var soap = GenerateSoapEnvelope(signedXml);
-                result.SoapReqRaw = soap;
-                // TODO: send HTTP request and parse response
-            }
-            catch (Exception ex) {
-                result.Error = ex;
-            }
             return await Task.FromResult(result);
+        }
 
+        public Task<FiskalizacijaResult<TReq, TRes>> SendAsync<TReqData, TReq, TRes>(
+            TReqData requestData,
+            RequestConfig<TReqData, TReq, TRes> config
+        ) where TReq : SerializableRequest where TRes : ParsedResponse {
+            return Execute(requestData!, config);
+        }
+
+        public Task<FiskalizacijaResult<TReq, TRes>> SendAsync<TReqData, TReq, TRes>(
+            TReq request,
+            RequestConfig<TReqData, TReq, TRes> config
+        ) where TReq : SerializableRequest where TRes : ParsedResponse {
+            return Execute(request!, config);
         }
 
         private string GenerateSoapEnvelope(string body, bool withXmlDec = true) {
