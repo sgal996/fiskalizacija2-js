@@ -12,11 +12,12 @@ namespace Fiskalizacija2 {
         }
 
         private async Task<FiskalizacijaResult<TReq, TRes>> Execute<TReqData, TReq, TRes>(
-            TReqData zahtjev,
+
             RequestConfig<TReqData, TReq, TRes> config
         ) where TReq : SerializableRequest where TRes : ParsedResponse {
             var result = new FiskalizacijaResult<TReq, TRes> { Success = false };
             try {
+
                 var requestInstance = zahtjev is TReq existing ? existing : config.RequestFactory!(zahtjev);
                 result.ReqObject = requestInstance;
                 var signedXml = _signer.SignFiscalizationRequest(requestInstance.ToXmlString(), requestInstance.Id);
@@ -39,7 +40,19 @@ namespace Fiskalizacija2 {
             catch (Exception ex) {
                 result.Error = ErrorUtils.ParseError(ex);
             }
-            return result;
+          
+
+                result.ReqObject = zahtjev;
+                var signedXml = _signer.SignFiscalizationRequest(zahtjev.ToXmlString(), zahtjev.Id);
+                var soap = GenerateSoapEnvelope(signedXml);
+                result.SoapReqRaw = soap;
+                // TODO: send HTTP request and parse response
+            }
+            catch (Exception ex) {
+                result.Error = ex;
+            }
+            return await Task.FromResult(result);
+
         }
 
         private string GenerateSoapEnvelope(string body, bool withXmlDec = true) {
