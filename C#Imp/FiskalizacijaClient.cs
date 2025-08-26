@@ -1,5 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using System.Xml.XPath;
+using Fiskalizacija2.Utils;
 
 namespace Fiskalizacija2 {
     public class FiskalizacijaClient {
@@ -38,10 +41,23 @@ namespace Fiskalizacija2 {
                 }
 
                 if (config.ResponseFactory != null) {
-                    result.ResObject = config.ResponseFactory(data);
+                    result.ResObject = XmlUtils.UsingXmlDocument(data, doc => {
+                        var ns = new XmlNamespaceManager(new NameTable());
+                        ns.AddNamespace("soapenv", "http://schemas.xmlsoap.org/soap/envelope/");
+                        ns.AddNamespace("efis", "http://www.porezna-uprava.gov.hr/fin/2024/types/eFiskalizacija");
+                        ns.AddNamespace("eizv", "http://www.porezna-uprava.gov.hr/fin/2024/types/eIzvjestavanje");
+                        var el = doc.XPathSelectElement(config.XPath, ns);
+                        if (el == null) {
+                            throw new ValidationError($"Expected element at '{config.XPath}'", data);
+                        }
+                        return config.ResponseFactory(el);
+                    });
                 }
 
-                result.Success = result.Error == null;
+                result.Success = result.Error == null &&
+                    result.ResObject != null &&
+                    result.ResObject.Odgovor.Greska == null &&
+                    result.ResObject.Odgovor.PrihvacenZahtjev;
             }
             catch (Exception ex) {
                 result.Error = ErrorUtils.ParseError(ex);
