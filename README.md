@@ -26,6 +26,7 @@ Metode za slanje zahtjeva su:
 - `evidentirajNaplatu(IEvidentirajNaplatu)`
 - `evidentirajOdbijanje(IEvidentirajOdbijanje)`
 - `evidentirajIsporukuZaKojuNijeIzdanERacun(IEvidentirajIsporukuZaKojuNijeIzdanERacun)`
+- `sendAsync(zahtjev | objektZahtjeva, config)` – generička metoda za slanje bilo kojeg zahtjeva
 
 Sve metode vraćaju `FiskalizacijaResult` objekt koji sadrži:
 
@@ -74,6 +75,17 @@ const client = new FiskalizacijaClient({
     publicCert: fs.readFileSync('path/to/publicCert.pem'),
 })
 ````
+
+### sendAsync
+
+```typescript
+const zahtjev = getEvidentirajERacunZahtjev('I', getERacunFromUbl(ublDocument));
+const result = await client.sendAsync(zahtjev, {
+    RequestClass: EvidentirajERacunZahtjev,
+    ResponseClass: EvidentirajERacunOdgovor,
+    xpath: "/soapenv:Envelope/soapenv:Body/efis:EvidentirajERacunOdgovor"
+});
+```
 
 ### EvidentirajERacun
 

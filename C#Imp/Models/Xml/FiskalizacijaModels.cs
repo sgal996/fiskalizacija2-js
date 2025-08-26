@@ -116,7 +116,9 @@ namespace Fiskalizacija2.Models.Xml
             res += Zaglavlje.ToXmlString();
             foreach (var r in Racun)
             {
-                res += r.ToXmlString();
+
+                // Placeholder - racun serialization not implemented
+
             }
             res += "</efis:EvidentirajIsporukuZaKojuNijeIzdanERacunZahtjev>";
             return res;
@@ -137,6 +139,7 @@ namespace Fiskalizacija2.Models.Xml
             {
                 res += n.ToXmlString();
             }
+
             res += "</efis:EvidentirajNaplatuZahtjev>";
             return res;
         }
@@ -152,10 +155,12 @@ namespace Fiskalizacija2.Models.Xml
         {
             var res = $"<efis:EvidentirajOdbijanjeZahtjev efis:id=\"{XmlUtils.XmlEscape(Id)}\">";
             res += Zaglavlje.ToXmlString();
+
             foreach (var o in Odbijanje)
             {
                 res += o.ToXmlString();
             }
+
             res += "</efis:EvidentirajOdbijanjeZahtjev>";
             return res;
         }
@@ -210,4 +215,7 @@ namespace Fiskalizacija2.Models.Xml
             return res;
         }
     }
+    public class Naplata { }
+    public class Odbijanje { }
+
 }

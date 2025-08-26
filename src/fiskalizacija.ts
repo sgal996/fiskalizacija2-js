@@ -82,7 +82,10 @@ export class FiskalizacijaClient {
             result.soapResRaw = data;
 
             try {
-                result.soapResSignatureValid = XmlSigner.isValidSignature(result.soapResRaw);
+                result.soapResSignatureValid = XmlSigner.isValidSignature(
+                    result.soapResRaw,
+                    this.options.publicCert
+                );
             } catch (error) {
                 result.soapResSignatureValid = false;
                 result.error = parseError(error);
@@ -101,6 +104,21 @@ export class FiskalizacijaClient {
         }
 
         return result;
+    }
+
+    sendAsync<TReqData, TReq extends SerializableRequest, TRes extends ParsedResponse>(
+        zahtjev: TReq,
+        config: RequestConfig<TReqData, TReq, TRes>
+    ): Promise<FiskalizacijaResult<TReq, TRes>>;
+    sendAsync<TReqData, TReq extends SerializableRequest, TRes extends ParsedResponse>(
+        zahtjev: TReqData,
+        config: RequestConfig<TReqData, TReq, TRes>
+    ): Promise<FiskalizacijaResult<TReq, TRes>>;
+    async sendAsync<TReqData, TReq extends SerializableRequest, TRes extends ParsedResponse>(
+        zahtjev: TReq | TReqData,
+        config: RequestConfig<TReqData, TReq, TRes>
+    ): Promise<FiskalizacijaResult<TReq, TRes>> {
+        return this.execute(zahtjev, config);
     }
 
     async evidentirajERacun(zahtjev: IEvidentirajERacunZahtjev | EvidentirajERacunZahtjev) {
