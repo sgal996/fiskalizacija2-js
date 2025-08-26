@@ -67,6 +67,14 @@ namespace Fiskalizacija2.Models.Xml
     {
         public string BrojDokumenta { get; set; } = string.Empty;
 
+        public string ToXmlString()
+        {
+            var res = "<efis:Racun>";
+            res += $"<efis:brojDokumenta>{XmlUtils.XmlEscape(BrojDokumenta)}</efis:brojDokumenta>";
+            res += "</efis:Racun>";
+            return res;
+        }
+
         public static Racun FromUblElement(XElement el, string type)
         {
             XNamespace cbc = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2";
@@ -108,7 +116,9 @@ namespace Fiskalizacija2.Models.Xml
             res += Zaglavlje.ToXmlString();
             foreach (var r in Racun)
             {
+
                 // Placeholder - racun serialization not implemented
+
             }
             res += "</efis:EvidentirajIsporukuZaKojuNijeIzdanERacunZahtjev>";
             return res;
@@ -125,6 +135,11 @@ namespace Fiskalizacija2.Models.Xml
         {
             var res = $"<efis:EvidentirajNaplatuZahtjev efis:id=\"{XmlUtils.XmlEscape(Id)}\">";
             res += Zaglavlje.ToXmlString();
+            foreach (var n in Naplata)
+            {
+                res += n.ToXmlString();
+            }
+
             res += "</efis:EvidentirajNaplatuZahtjev>";
             return res;
         }
@@ -140,11 +155,67 @@ namespace Fiskalizacija2.Models.Xml
         {
             var res = $"<efis:EvidentirajOdbijanjeZahtjev efis:id=\"{XmlUtils.XmlEscape(Id)}\">";
             res += Zaglavlje.ToXmlString();
+
+            foreach (var o in Odbijanje)
+            {
+                res += o.ToXmlString();
+            }
+
             res += "</efis:EvidentirajOdbijanjeZahtjev>";
             return res;
         }
     }
 
+    public class Naplata
+    {
+        public string BrojDokumenta { get; set; } = string.Empty;
+        public string DatumIzdavanja { get; set; } = string.Empty;
+        public string OibPorezniBrojIzdavatelja { get; set; } = string.Empty;
+        public string OibPorezniBrojPrimatelja { get; set; } = string.Empty;
+        public string DatumNaplate { get; set; } = string.Empty;
+        public decimal NaplaceniIznos { get; set; }
+        public string NacinPlacanja { get; set; } = string.Empty;
+
+        public string ToXmlString()
+        {
+            var res = "<efis:Naplata>";
+            res += $"<efis:brojDokumenta>{XmlUtils.XmlEscape(BrojDokumenta)}</efis:brojDokumenta>";
+            res += $"<efis:datumIzdavanja>{XmlUtils.XmlEscape(DatumIzdavanja)}</efis:datumIzdavanja>";
+            res += $"<efis:oibPorezniBrojIzdavatelja>{XmlUtils.XmlEscape(OibPorezniBrojIzdavatelja)}</efis:oibPorezniBrojIzdavatelja>";
+            res += $"<efis:oibPorezniBrojPrimatelja>{XmlUtils.XmlEscape(OibPorezniBrojPrimatelja)}</efis:oibPorezniBrojPrimatelja>";
+            res += $"<efis:datumNaplate>{XmlUtils.XmlEscape(DatumNaplate)}</efis:datumNaplate>";
+            res += $"<efis:naplaceniIznos>{NaplaceniIznos:F2}</efis:naplaceniIznos>";
+            res += $"<efis:nacinPlacanja>{XmlUtils.XmlEscape(NacinPlacanja)}</efis:nacinPlacanja>";
+            res += "</efis:Naplata>";
+            return res;
+        }
+    }
+
+    public class Odbijanje
+    {
+        public string BrojDokumenta { get; set; } = string.Empty;
+        public string DatumIzdavanja { get; set; } = string.Empty;
+        public string OibPorezniBrojIzdavatelja { get; set; } = string.Empty;
+        public string OibPorezniBrojPrimatelja { get; set; } = string.Empty;
+        public string DatumOdbijanja { get; set; } = string.Empty;
+        public string VrstaRazlogaOdbijanja { get; set; } = string.Empty;
+        public string RazlogOdbijanja { get; set; } = string.Empty;
+
+        public string ToXmlString()
+        {
+            var res = "<efis:Odbijanje>";
+            res += $"<efis:brojDokumenta>{XmlUtils.XmlEscape(BrojDokumenta)}</efis:brojDokumenta>";
+            res += $"<efis:datumIzdavanja>{XmlUtils.XmlEscape(DatumIzdavanja)}</efis:datumIzdavanja>";
+            res += $"<efis:oibPorezniBrojIzdavatelja>{XmlUtils.XmlEscape(OibPorezniBrojIzdavatelja)}</efis:oibPorezniBrojIzdavatelja>";
+            res += $"<efis:oibPorezniBrojPrimatelja>{XmlUtils.XmlEscape(OibPorezniBrojPrimatelja)}</efis:oibPorezniBrojPrimatelja>";
+            res += $"<efis:datumOdbijanja>{XmlUtils.XmlEscape(DatumOdbijanja)}</efis:datumOdbijanja>";
+            res += $"<efis:vrstaRazlogaOdbijanja>{XmlUtils.XmlEscape(VrstaRazlogaOdbijanja)}</efis:vrstaRazlogaOdbijanja>";
+            res += $"<efis:razlogOdbijanja>{XmlUtils.XmlEscape(RazlogOdbijanja)}</efis:razlogOdbijanja>";
+            res += "</efis:Odbijanje>";
+            return res;
+        }
+    }
     public class Naplata { }
     public class Odbijanje { }
+
 }
