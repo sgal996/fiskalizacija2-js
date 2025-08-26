@@ -68,15 +68,20 @@ export class XmlSigner {
             objects: [{ content: this.getXAdESContent(signatureId, signedPropertiesId, signingTime) }]
         });
 
-        // Add reference to the entire document
+        // Add reference to the entire document by ID
         sig.addReference({
+            uri: `#${referenceURI}`,
             xpath: `//*[@*[local-name()='id'] = '${referenceURI}']`,
             digestAlgorithm: this.options.digestAlgorithm,
-            transforms: ["http://www.w3.org/2000/09/xmldsig#enveloped-signature", "http://www.w3.org/2001/10/xml-exc-c14n#"]
+            transforms: [
+                "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
+                "http://www.w3.org/2001/10/xml-exc-c14n#"
+            ]
         });
 
-        // Add reference to the SignedProperties
+        // Add reference to the SignedProperties by ID
         sig.addReference({
+            uri: `#${signedPropertiesId}`,
             xpath: `//*[@Id='${signedPropertiesId}']`,
             type: "http://uri.etsi.org/01903#SignedProperties",
             digestAlgorithm: "http://www.w3.org/2001/04/xmlenc#sha256",
